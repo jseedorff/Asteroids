@@ -1,0 +1,26 @@
+# Python bytecode/cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Claude Code
+.claude/
+
+# Editor
+.vscode/
+.idea/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Packaging/build artifacts (harmless to include even if unused yet)
+build/
+dist/
+*.egg-info/
