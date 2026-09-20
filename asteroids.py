@@ -267,6 +267,10 @@ def main():
         sounds = sound.Sounds()
         thrust_channel = pygame.mixer.Channel(0)
         ufo_channel = pygame.mixer.Channel(1)
+        # Keep channels 0-1 off-limits to Sound.play()'s automatic channel
+        # picker, so one-shot effects (e.g. ship_explosion) can't land on the
+        # looping thrust/UFO channels and get cut off by their .stop() calls.
+        pygame.mixer.set_reserved(2)
     except pygame.error:
         # No audio device available (e.g. headless environment) - play silently.
         sounds = None

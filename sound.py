@@ -22,14 +22,23 @@ def make_blip(freq_start, freq_end, duration, volume=0.5):
 
 
 def make_explosion(duration, volume=0.6, decay=5.0, thump_freq=90, thump_amount=0.5,
-                    crackle=0.0, crack_freq=(900, 150), crack_duration=0.05):
-    """Decaying noise layered with a low-frequency thump and an initial crack transient."""
+                    crackle=0.0, crack_freq=(900, 150), crack_duration=0.05, noise_cutoff=None):
+    """Decaying noise layered with a low-frequency thump and an initial crack transient.
+
+    noise_cutoff, if set, low-passes the noise bed (like make_rumble) so it reads
+    as a deep boom instead of a bright hiss.
+    """
     n = int(SAMPLE_RATE * duration)
     t_env = np.linspace(0, 1, n, endpoint=False)
     t = np.linspace(0, duration, n, endpoint=False)
     envelope = np.exp(-decay * t_env)
 
     noise = np.random.uniform(-1, 1, n)
+    if noise_cutoff:
+        window = max(1, int(SAMPLE_RATE / noise_cutoff))
+        kernel = np.ones(window) / window
+        noise = np.convolve(noise, kernel, mode="same")
+        noise = noise / (np.max(np.abs(noise)) + 1e-9)
     thump = np.sin(2 * np.pi * thump_freq * t) * np.exp(-decay * 1.6 * t_env)
     signal = noise * envelope * (1 - thump_amount) + thump * thump_amount
 
@@ -76,8 +85,8 @@ class Sounds:
             crackle=0.5, crack_freq=(1200, 300), crack_duration=0.04,
         )
         self.ship_explosion = make_explosion(
-            1.0, volume=0.8, decay=2.2, thump_freq=50, thump_amount=0.65,
-            crackle=0.25, crack_freq=(900, 150), crack_duration=0.06,
+            1.3, volume=0.85, decay=1.5, thump_freq=38, thump_amount=0.8,
+            crackle=0.15, crack_freq=(500, 80), crack_duration=0.08, noise_cutoff=250,
         )
         self.thrust = make_rumble(1.0, volume=0.18)
         self.ufo_hum = make_siren(1.5, 250, 450, mod_rate=2.5, volume=0.22)
